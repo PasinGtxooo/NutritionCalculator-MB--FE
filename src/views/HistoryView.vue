@@ -33,27 +33,18 @@
                    transform hover:scale-110 active:scale-95
                    transition-all duration-300 cursor-pointer"
           >
-            🥗
+          <img src="/logoGreenHealth2remove.png" alt="Logo" class="w-9 h-9 rounded-2xl object-cover" />
           </div>
 
-          <h1 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-            Nutrition
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent whitespace-nowrap">
+            Green Health Buddy Nutrition Advisor
           </h1>
         </div>
       </div>
 
       <!-- Right -->
       <div class="flex justify-end">
-        <button
-          @click="router.push('/profile')"
-          class="flex items-center gap-2 px-4 py-2 rounded-xl
-                 bg-gradient-to-r from-slate-100 to-slate-200
-                 hover:from-slate-200 hover:to-slate-300
-                 transition-all duration-300 shadow-sm hover:shadow-md"
-        >
-          <span class="text-lg">👳💣</span>
-          <span class="text-sm font-medium text-slate-700">Profile</span>
-        </button>
+       
       </div>
 
     </div>
@@ -61,7 +52,6 @@
 </header>
 
     <div class="flex max-w-7xl mx-auto">
-      <!-- Elegant Sidebar (เหมือน Homepage) -->
       <aside class="hidden lg:flex flex-col w-64 bg-white/50 backdrop-blur-xl border-r border-slate-200/50 min-h-[calc(100vh-73px)] sticky top-[73px]">
         <nav class="flex-1 p-4 space-y-2">
           <button
@@ -83,29 +73,28 @@
 
         <!-- Sidebar Footer -->
         <div class="p-4 space-y-3 border-t border-slate-200/50">
-          <div class="p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 hover:shadow-md transition-shadow duration-300">
+          <button @click="router.push('/profile')" class="w-full p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 hover:shadow-md transition-shadow duration-300 text-left">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-semibold shadow-lg">
                 {{ user?.username?.charAt(0).toUpperCase() || 'U' }}
               </div>
               <div>
                 <div class="font-semibold text-slate-800">{{ user?.username || 'Username' }}</div>
-                <div class="text-xs text-slate-500">Premium Member</div>
               </div>
             </div>
-          </div>
+          </button>
           <button
-            @click="router.push('/signin')"
+            @click="logout"
             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-300 transform hover:scale-105"
           >
-            <span class="text-xl">✈💥🏢</span>
+            <span class="text-xl">🚪</span>
             <span class="font-medium">Logout</span>
           </button>
         </div>
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6 lg:p-8">
+      <main class="flex-1 p-6 pb-24 lg:pb-8 lg:p-8">
         <div class="space-y-6 animate-fade-in">
 
           <!-- Page Header + Search -->
@@ -254,15 +243,28 @@
 </template>
 
 <script setup>
+import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import authApi from '../api/authApi'
 import foodApi from '../api/foodApi'
-import { jsPDF } from 'jspdf'
-import html2canvas from 'html2canvas'
 
 const router = useRouter()
 const user = ref(null)
+
+const navigation = [
+  { id: 'dashboard', icon: '🏠', label: 'Dashboard', link: '/homepage' },
+  { id: 'chatbot', icon: '💬', label: 'Chatbot', link: '/chatbot' },
+  { id: 'addfood', icon: '➕', label: 'เพิ่มอาหาร', link: '/addfood' },
+  { id: 'history', icon: '📋', label: 'ประวัติอาหาร', link: '/history' }
+]
+
+const logout = () => {
+  if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+    router.push('/signin')
+  }
+}
 const foodLogs = ref([])
 const loading = ref(true)
 const searchQuery = ref('')
@@ -322,19 +324,10 @@ const filteredLogs = computed(() => {
 })
 
 const formatDateLabel = (date) => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
   const target = new Date(date)
   target.setHours(0, 0, 0, 0)
-
-  const diff = Math.round((today - target) / 86400000)
   const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
-  const dayStr = `${target.getDate()} ${months[target.getMonth()]}`
-
-  if (diff === 0) return `วันนี้ • ${dayStr}`
-  if (diff === 1) return `เมื่อวาน • ${dayStr}`
-  return dayStr
+  return `${target.getDate()} ${months[target.getMonth()]} ${target.getFullYear()}`
 }
 
 const groupedLogs = computed(() => {
@@ -383,12 +376,10 @@ const avgCalories = computed(() => {
 })
 
 
-
 const exportToPDF = async () => {
   isExporting.value = true
 
   try {
-    // สร้าง HTML ที่จะ render เป็น PDF
     const dateStr = new Date().toLocaleDateString('th-TH')
     const rows = groupedLogs.value.flatMap(group =>
       group.items.map(item => `
@@ -407,7 +398,7 @@ const exportToPDF = async () => {
     container.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:32px;font-family:Sarabun,sans-serif;font-size:13px'
     container.innerHTML = `
       <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
-      <h2 style="color:#16a34a;margin:0 0 6px">Nutrition Report</h2>
+      <h2 style="color:#16a34a;margin:0 0 6px">Green Health Buddy Report</h2>
       <p style="color:#555;margin:0 0 4px">ผู้ใช้: ${user.value?.username || '-'}</p>
       <p style="color:#555;margin:0 0 20px">วันที่ส่งออก: ${dateStr}</p>
       <table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -428,7 +419,6 @@ const exportToPDF = async () => {
         รวม ${totalMeals.value} มื้อ | ${totalDays.value} วัน | เฉลี่ย ${avgCalories.value} kcal/วัน
       </p>`
 
-    // zebra stripes
     container.querySelectorAll('tbody tr:nth-child(even)').forEach(tr => {
       tr.style.background = '#f0fdf4'
     })
@@ -438,8 +428,6 @@ const exportToPDF = async () => {
     })
 
     document.body.appendChild(container)
-
-    // รอ font โหลด
     await document.fonts.ready
 
     const canvas = await html2canvas(container, {
@@ -447,7 +435,6 @@ const exportToPDF = async () => {
       useCORS: true,
       backgroundColor: '#ffffff',
       onclone: (clonedDoc) => {
-        // ลบ stylesheet ทั้งหมดออก (Tailwind ใช้ oklch ที่ html2canvas ไม่รองรับ)
         clonedDoc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => {
           if (!el.href?.includes('fonts.googleapis.com')) el.remove()
         })
@@ -455,9 +442,7 @@ const exportToPDF = async () => {
     })
     document.body.removeChild(container)
 
-    const imgData = canvas.toDataURL('image/png')
     const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' })
-
     const pageW = doc.internal.pageSize.getWidth()
     const pageH = doc.internal.pageSize.getHeight()
     const imgW = pageW - 20

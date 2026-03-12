@@ -20,8 +20,8 @@
         </Button>
         
         <!-- Icon -->
-        <div class="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-4 animate-bounce">
-          <Target class="w-8 h-8 text-white" />
+        <div class="mx-auto w-28 h-28 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-4 animate-bounce">
+          <img src="/logoGreenHealth.png" alt="Logo" class="w-24 h-24 rounded-2xl object-cover" />
         </div>
         
         <CardTitle class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
@@ -46,13 +46,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">
                 <Label for="username">Username</Label>
-                <Input 
-                  id="username" 
-                  v-model="form.username" 
-                  required 
-                  placeholder="Enter username"
-                  class="h-12 rounded-xl border-2 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-300 hover:border-emerald-300"
+                <Input
+                  id="username"
+                  v-model="form.username"
+                  required
+                  placeholder="Enter username (a-z, 0-9)"
+                  :class="['h-12 rounded-xl border-2 transition-all duration-300', errors.username ? 'border-red-400 focus:border-red-500' : 'focus:border-emerald-500 focus:ring-emerald-500/20 hover:border-emerald-300']"
+                  @input="validateUsername"
+                  @blur="checkUsernameAvailable"
                 />
+                <p v-if="errors.username" class="text-xs text-red-500 mt-1">{{ errors.username }}</p>
+                <p v-if="usernameChecking" class="text-xs text-slate-400 mt-1">กำลังตรวจสอบ...</p>
+                <p v-if="!errors.username && usernameAvailable && form.username" class="text-xs text-emerald-500 mt-1">✓ Username พร้อมใช้งาน</p>
               </div>
               
               <div class="space-y-2">
@@ -69,28 +74,49 @@
               
               <div class="space-y-2">
                 <Label for="password">Password</Label>
-                <Input 
-                  id="password" 
-                  v-model="form.password" 
-                  type="password" 
-                  required 
-                  minlength="6"
-                  placeholder="Enter password"
-                  class="h-12 rounded-xl border-2 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-300 hover:border-emerald-300"
-                />
+                <div class="relative">
+                  <Input
+                    id="password"
+                    v-model="form.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    required
+                    minlength="6"
+                    placeholder="Enter password"
+                    class="h-12 pr-12 rounded-xl border-2 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-300 hover:border-emerald-300"
+                  />
+                  <button
+                    type="button"
+                    @click="showPassword = !showPassword"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-500 transition-colors"
+                  >
+                    <Eye v-if="!showPassword" class="w-5 h-5" />
+                    <EyeOff v-else class="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              
+
               <div class="space-y-2">
                 <Label for="confirmPassword">Confirm Password</Label>
-                <Input 
-                  id="confirmPassword" 
-                  v-model="form.confirmPassword" 
-                  type="password" 
-                  required 
-                  minlength="6"
-                  placeholder="Confirm password"
-                  class="h-12 rounded-xl border-2 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-300 hover:border-emerald-300"
-                />
+                <div class="relative">
+                  <Input
+                    id="confirmPassword"
+                    v-model="form.confirmPassword"
+                    :type="showConfirmPassword ? 'text' : 'password'"
+                    required
+                    minlength="6"
+                    placeholder="Confirm password"
+                    :class="['h-12 pr-12 rounded-xl border-2 transition-all duration-300', errors.confirmPassword ? 'border-red-400' : 'focus:border-emerald-500 focus:ring-emerald-500/20 hover:border-emerald-300']"
+                  />
+                  <button
+                    type="button"
+                    @click="showConfirmPassword = !showConfirmPassword"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-500 transition-colors"
+                  >
+                    <Eye v-if="!showConfirmPassword" class="w-5 h-5" />
+                    <EyeOff v-else class="w-5 h-5" />
+                  </button>
+                </div>
+                <p v-if="errors.confirmPassword" class="text-xs text-red-500 mt-1">{{ errors.confirmPassword }}</p>
               </div>
               
               <div class="space-y-2">
@@ -368,9 +394,15 @@
             </div>
           </div>
           
+          <!-- Error Message -->
+          <div v-if="errors.form" class="flex items-start gap-3 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-600">
+            <span class="text-lg flex-shrink-0">⚠️</span>
+            <span class="text-sm font-semibold whitespace-pre-line">{{ errors.form }}</span>
+          </div>
+
           <!-- Submit Button -->
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             :disabled="isSubmitting"
             class="w-full h-14 text-lg font-bold rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-1 group"
           >
@@ -389,6 +421,8 @@ import {
   ArrowLeft,
   ArrowRight,
   Clock,
+  Eye,
+  EyeOff,
   Ruler,
   Sparkles,
   Target,
@@ -411,6 +445,37 @@ import authApi from '../api/authApi'
 
 const router = useRouter()
 const isSubmitting = ref(false)
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+
+const errors = reactive({ username: '', confirmPassword: '', form: '' })
+const usernameChecking = ref(false)
+const usernameAvailable = ref(false)
+
+const validateUsername = () => {
+  const val = form.username
+  form.username = val.replace(/[^a-zA-Z0-9_]/g, '')
+  errors.username = form.username !== val
+    ? 'Username ใส่ได้แค่ภาษาอังกฤษ (a-z, 0-9, _)'
+    : ''
+  usernameAvailable.value = false
+}
+
+const checkUsernameAvailable = async () => {
+  if (!form.username || errors.username) return
+  usernameChecking.value = true
+  usernameAvailable.value = false
+  try {
+    await authApi.checkUsername(form.username)
+    usernameAvailable.value = true
+  } catch (err) {
+    if (err.response?.status === 409) {
+      errors.username = 'Username นี้ถูกใช้งานแล้ว'
+    }
+  } finally {
+    usernameChecking.value = false
+  }
+}
 
 const form = reactive({
   username: "",
@@ -459,50 +524,55 @@ const goBack = () => {
 
 const submitForm = async () => {
   if (isSubmitting.value) return
-  
+
+  errors.form = ''
+  errors.confirmPassword = ''
+
+  const missingFields = []
+  if (!form.username) missingFields.push('Username')
+  if (!form.phone) missingFields.push('Phone')
+  if (!form.password) missingFields.push('Password')
+  if (!form.confirmPassword) missingFields.push('Confirm Password')
+  if (!form.birthDate) missingFields.push('Birth Date')
+  if (!form.sex) missingFields.push('Sex')
+  if (!form.height || form.height <= 0) missingFields.push('Height (cm)')
+  if (!form.weight || form.weight <= 0) missingFields.push('Weight (kg)')
+  if (!form.activitylevel) missingFields.push('Activity Level')
+  if (!form.maingoal) missingFields.push('Main Goal')
+  if (!form.breakfastTime) missingFields.push('Breakfast Time')
+  if (!form.lunchTime) missingFields.push('Lunch Time')
+  if (!form.dinnerTime) missingFields.push('Dinner Time')
+
+  if (missingFields.length > 0) {
+    errors.form = `กรุณากรอกข้อมูลให้ครบ:\n• ${missingFields.join('\n• ')}`
+    return
+  }
+
+  if (form.phone.length < 10) {
+    errors.form = 'เบอร์โทรต้องมีอย่างน้อย 10 หลัก'
+    return
+  }
+
+  if (form.password !== form.confirmPassword) {
+    errors.confirmPassword = 'รหัสผ่านไม่ตรงกัน'
+    return
+  }
+
   try {
     isSubmitting.value = true
-    
-    const missingFields = []
-    
-    if (!form.username) missingFields.push('Username')
-    if (!form.phone) missingFields.push('Phone')
-    if (!form.password) missingFields.push('Password')
-    if (!form.confirmPassword) missingFields.push('Confirm Password')
-    if (!form.birthDate) missingFields.push('Birth Date')
-    if (!form.sex) missingFields.push('Sex')
-    if (!form.height || form.height <= 0) missingFields.push('Height')
-    if (!form.weight || form.weight <= 0) missingFields.push('Weight')
-    if (!form.activitylevel) missingFields.push('Activity Level')
-    if (!form.maingoal) missingFields.push('Main Goal')
-    if (!form.breakfastTime) missingFields.push('Breakfast Time')
-    if (!form.lunchTime) missingFields.push('Lunch Time')
-    if (!form.dinnerTime) missingFields.push('Dinner Time')
-    
-    if (missingFields.length > 0) {
-      alert(`Please fill in the following fields:\n• ${missingFields.join('\n• ')}`)
-      return
-    }
-    
-    if (form.password !== form.confirmPassword) {
-      alert('Passwords do not match!')
-      return
-    }
-    
-    if (form.phone.length < 10) {
-      alert('Phone number must be at least 10 digits')
-      return
-    }
-
-    console.log('Registering user', form)
     const res = await authApi.register(form)
-    
-    console.log('Register success', res.data)
-    alert('Registration successful! Please login.')
+    if (!res.data.success) {
+      const msg = res.data.message || ''
+      if (msg.toLowerCase().includes('username')) {
+        errors.username = 'Username นี้ถูกใช้งานแล้ว'
+      } else {
+        errors.form = msg || 'สมัครสมาชิกไม่สำเร็จ'
+      }
+      return
+    }
     router.push('/signin')
   } catch (err) {
-    console.error('Register failed', err)
-    alert(err.response?.data?.message || 'Registration failed. Please try again.')
+    errors.form = err.response?.data?.message || 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่'
   } finally {
     isSubmitting.value = false
   }

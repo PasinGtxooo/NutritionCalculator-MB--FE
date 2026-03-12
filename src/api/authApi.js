@@ -13,10 +13,14 @@ const authApi = {
           })
   },
   getUserByToken() {
-  return apiClient.get('/user/jwt', {
-            headers: { 'Content-Type': 'application/json' },
-          })
-}
+    return apiClient.get('/user/jwt', {
+      headers: { 'Content-Type': 'application/json' },
+    })
+  },
+
+  checkUsername(username) {
+    return apiClient.get(`/auth/check-username?username=${encodeURIComponent(username)}`)
+  }
 }
 
 export default authApi

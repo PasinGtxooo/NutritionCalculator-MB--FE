@@ -6,19 +6,12 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-2xl shadow-lg shadow-green-500/30 transform hover:scale-105 transition-transform duration-300">
-              🥗
+              <img src="/logoGreenHealth2remove.png" alt="Logo" class="w-9 h-9 rounded-2xl object-cover" />
             </div>
             <h1 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              Nutrition
+              Green Health Buddy Nutrition Advisor
             </h1>
           </div>
-          <button 
-            @click="goToProfile" 
-            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 transition-all duration-300 shadow-sm hover:shadow-md"
-          >
-            <span class="text-lg">👳💣</span>
-            <span class="text-sm font-medium text-slate-700">Profile</span>
-          </button>
         </div>
       </div>
     </header>
@@ -47,28 +40,27 @@
         <!-- Sidebar Footer -->
         <div class="p-4 space-y-3 border-t border-slate-200/50">
           <div class="p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 hover:shadow-md transition-shadow duration-300">
-            <div class="flex items-center gap-3">
+            <button @click="router.push('/profile')" class="flex items-center gap-3 w-full text-left hover:opacity-80 transition-opacity">
               <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-semibold shadow-lg">
                 {{ user?.username?.charAt(0).toUpperCase() || 'U' }}
               </div>
               <div>
                 <div class="font-semibold text-slate-800">{{ user?.username || 'Username' }}</div>
-                <div class="text-xs text-slate-500">Premium Member</div>
               </div>
-            </div>
+            </button>
           </div>
           <button 
             @click="logout" 
             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-300 transform hover:scale-105"
           >
-            <span class="text-xl">✈💥🏢</span>
+            <span class="text-xl">🚪</span>
             <span class="font-medium">Logout</span>
           </button>
         </div>
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6 lg:p-8">
+      <main class="flex-1 p-6 pb-24 lg:pb-8 lg:p-8">
         
         <!-- ==================== DASHBOARD ==================== -->
         <div v-if="currentPage === 'dashboard'" class="space-y-6">
@@ -358,20 +350,20 @@
                 เพิ่มอาหารเลย ➕
               </button>
             </div>
-            <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div
                 v-for="(meal, idx) in recentMeals"
                 :key="idx"
                 class="group bg-white rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
               >
-                <div class="flex items-center gap-4">
+                <div class="flex flex-col items-center gap-2 md:flex-row md:items-center md:gap-4">
                   <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center text-2xl shadow-sm group-hover:scale-105 transition-transform duration-300 overflow-hidden flex-shrink-0">
                     <img v-if="meal.image" :src="meal.image" class="w-full h-full object-cover rounded-2xl" />
                     <span v-else>🍽️</span>
                   </div>
-                  <div class="flex-1 min-w-0">
+                  <div class="flex-1 min-w-0 text-center md:text-left">
                     <div class="text-xs text-slate-400 mb-1">{{ meal.time }}</div>
-                    <div class="font-semibold text-slate-800 truncate">{{ meal.name }}</div>
+                    <div class="font-semibold text-slate-800 truncate text-sm">{{ meal.name }}</div>
                     <div class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-semibold">
                       🔥 {{ meal.calories }}
                     </div>
@@ -409,9 +401,9 @@
               >
                 <div
                   v-if="msg.isBot"
-                  class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-xl flex-shrink-0 shadow-lg"
+                  class="w-14 h-14 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-xl flex-shrink-0 shadow-lg"
                 >
-                  🤖
+                  <img src="/logoGreenHealthAI.png" alt="Bot" class="w-12 h-12 rounded-2xl object-cover" />
                 </div>
                 <div
                   :class="[
@@ -434,9 +426,6 @@
 
             <div class="border-t border-slate-200 p-4 bg-slate-50">
               <div class="flex gap-2">
-                <button class="p-3 rounded-xl bg-white hover:bg-slate-100 transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105">
-                  <span class="text-xl">📎</span>
-                </button>
                 <input
                   v-model="chatMessage"
                   @keyup.enter="sendMessage"
@@ -636,14 +625,30 @@
           :key="item.id"
           @click="item.link ? router.push(item.link) : (currentPage = item.id)"
           :class="[
-            'flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-300',
+            'flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-all duration-300',
             currentPage === item.id
               ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg'
               : 'text-slate-600'
           ]"
         >
-          <span class="text-2xl">{{ item.icon }}</span>
+          <span class="text-xl">{{ item.icon }}</span>
           <span class="text-xs font-medium">{{ item.label }}</span>
+        </button>
+        <button
+          @click="router.push('/profile')"
+          class="flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-all duration-300 text-slate-600 hover:bg-slate-100"
+        >
+          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white text-xs font-bold">
+            {{ user?.username?.charAt(0).toUpperCase() || 'U' }}
+          </div>
+          <span class="text-xs font-medium">โปรไฟล์</span>
+        </button>
+        <button
+          @click="logout"
+          class="flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-all duration-300 text-red-500 hover:bg-red-50"
+        >
+          <span class="text-xl">🚪</span>
+          <span class="text-xs font-medium">ออกจากระบบ</span>
         </button>
       </div>
     </nav>
@@ -651,19 +656,24 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import authApi from '../api/authApi';
-import foodApi from '../api/foodApi';
-import chatApi from '../api/chatApi';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  CategoryScale,
   Chart as ChartJS,
-  CategoryScale, LinearScale, PointElement, LineElement,
-  Filler, Tooltip, Legend
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
+import { computed, onMounted, ref } from 'vue';
 import { Line } from 'vue-chartjs';
+import { useRouter } from 'vue-router';
+import authApi from '../api/authApi';
+import chatApi from '../api/chatApi';
+import foodApi from '../api/foodApi';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip, Legend, annotationPlugin);
 
@@ -1173,13 +1183,10 @@ const submitFood = async () => {
   } catch (err) {
     console.error('ADD FOOD ERROR:', err.response?.data || err);
 
-    // ✅ แม้ backend 500 ก็ยังแสดงกล่อง AI ได้
-    aiResult.value = {
-      name: 'บันทึกสำเร็จ แต่ AI ขัดข้อง',
-      advice: 'ข้อมูลอาหารถูกบันทึกแล้ว แต่การวิเคราะห์โภชนาการล้มเหลว'
-    };
+    const errMsg = err.response?.data?.message || err.message || 'เกิดข้อผิดพลาด';
 
-    alert('บันทึกอาหารแล้ว แต่ AI วิเคราะห์ไม่สำเร็จ');
+    aiResult.value = null;
+    alert(errMsg);
   } finally {
     isSubmitting.value = false;
   }

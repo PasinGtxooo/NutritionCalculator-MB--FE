@@ -12,12 +12,12 @@ Copy
     <Card class="w-full max-w-md backdrop-blur-xl bg-white/60 border border-white/80 shadow-2xl shadow-black/10 rounded-3xl z-10">
       <CardHeader class="text-center pb-2">
         <!-- Icon -->
-        <div class="mx-auto w-18 h-18 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-4 animate-bounce">
-          <Lock class="w-9 h-9 text-white" />
+        <div class="mx-auto w-28 h-28 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-4 animate-bounce">
+          <img src="/logoGreenHealth.png" alt="Logo" class="w-24 h-24 rounded-2xl object-cover" />
         </div>
         
         <CardTitle class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
-          Welcome Back
+          Welcome
         </CardTitle>
         <CardDescription class="text-gray-500">
           Sign in to continue your fitness journey
@@ -47,14 +47,22 @@ Copy
             <Label for="password">Password</Label>
             <div class="relative">
               <KeyRound class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <Input 
-                id="password" 
-                v-model="password" 
-                type="password"
-                required 
+              <Input
+                id="password"
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                required
                 placeholder="Enter password"
-                class="h-14 pl-12 rounded-xl border-2 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-300 hover:border-emerald-300 text-base"
+                class="h-14 pl-12 pr-12 rounded-xl border-2 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-300 hover:border-emerald-300 text-base"
               />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-500 transition-colors"
+              >
+                <Eye v-if="!showPassword" class="w-5 h-5" />
+                <EyeOff v-else class="w-5 h-5" />
+              </button>
             </div>
           </div>
           
@@ -118,14 +126,16 @@ Copy
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { 
-  Lock, 
-  User, 
-  KeyRound, 
-  ArrowRight, 
+import {
+  Lock,
+  User,
+  KeyRound,
+  ArrowRight,
   Check,
   AlertCircle,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff
 } from 'lucide-vue-next'
 
 // shadcn-vue components
@@ -143,6 +153,7 @@ const password = ref("")
 const rememberMe = ref(false)
 const errorMessage = ref("")
 const isLoading = ref(false)
+const showPassword = ref(false)
 
 const login = async () => {
   errorMessage.value = ""
