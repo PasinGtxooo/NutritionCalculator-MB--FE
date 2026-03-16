@@ -40,6 +40,3 @@ Backend (Separate Repository)
 - Spring Boot
 - PostgreSQL
 
----
-
-## Project Structure
