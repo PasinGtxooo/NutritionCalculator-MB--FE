@@ -1,5 +1,45 @@
-# Vue 3 + Vite
+# Nutrition Calculator MB - Frontend
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+เว็บแอปพลิเคชันสำหรับบันทึกและวิเคราะห์โภชนาการอาหาร โดยผู้ใช้สามารถอัปโหลดรูปอาหารหรือกรอกชื่ออาหารเพื่อให้ระบบวิเคราะห์พลังงาน (Calories) และสารอาหารหลัก (Macronutrients) ได้อัตโนมัติ
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+โปรเจคนี้เป็นส่วน **Frontend** ของระบบ Nutrition Calculator ที่พัฒนาเพื่อช่วยให้ผู้ใช้สามารถติดตามพฤติกรรมการรับประทานอาหาร และคำนวณโภชนาการในแต่ละวันได้ง่ายขึ้น
+
+---
+
+## Demo
+
+Live Website  
+https://nutritioncalculatormb.vercel.app/
+
+---
+
+## Features
+
+- ระบบสมัครสมาชิก / เข้าสู่ระบบ
+- บันทึกอาหารรายวัน (Food Logging)
+- อัปโหลดรูปอาหารเพื่อวิเคราะห์โภชนาการ
+- แสดงข้อมูล Calories และ Macronutrients
+- Dashboard สรุปข้อมูลอาหาร
+- ระบบ Chatbot สำหรับช่วยแนะนำอาหาร
+- ระบบค้นหาอาหาร
+
+---
+
+## Tech Stack
+
+Frontend
+- Vue.js
+- JavaScript
+- HTML / CSS
+- Axios
+
+Deployment
+- Vercel
+
+Backend (Separate Repository)
+- Spring Boot
+- PostgreSQL
+
+---
+
+## Project Structure
