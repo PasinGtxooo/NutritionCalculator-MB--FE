@@ -255,8 +255,6 @@ const user = ref(null)
 
 const navigation = [
   { id: 'dashboard', icon: '🏠', label: 'Dashboard', link: '/homepage' },
-  { id: 'chatbot', icon: '💬', label: 'Chatbot', link: '/chatbot' },
-  { id: 'addfood', icon: '➕', label: 'เพิ่มอาหาร', link: '/addfood' },
   { id: 'history', icon: '📋', label: 'ประวัติอาหาร', link: '/history' }
 ]
 
@@ -474,11 +472,6 @@ const exportToPDF = async () => {
 }
 
 onMounted(async () => {
-  try {
-    const res = await authApi.getUserByToken()
-    if (res.data?.data) user.value = res.data.data
-  } catch {}
-
   try {
     const res = await foodApi.getFoods()
     foodLogs.value = res.data || []

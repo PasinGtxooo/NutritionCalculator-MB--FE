@@ -997,7 +997,10 @@ onMounted(async () => {
     await loadChatHistory();
   } catch (err) {
     console.error('Failed to load user', err);
-    error.value = 'Not logged in';
+    if (err.response?.status !== 401) {
+      // network error / Render waking up — stay on page
+      error.value = 'ไม่สามารถโหลดข้อมูลได้ กรุณารีเฟรช';
+    }
   } finally {
     loading.value = false;
   }

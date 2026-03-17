@@ -26,6 +26,7 @@ router.beforeEach((to, from, next) => {
   }
 
   const token = localStorage.getItem('token')
+  console.log('[Router] navigating to:', to.name, '| token:', token ? 'EXISTS' : 'MISSING')
   if (!token) {
     return next({ name: 'signin' })
   }

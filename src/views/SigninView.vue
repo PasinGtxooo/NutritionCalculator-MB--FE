@@ -51,6 +51,7 @@ Copy
                 id="password"
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
+                autocomplete="current-password"
                 required
                 placeholder="Enter password"
                 class="h-14 pl-12 pr-12 rounded-xl border-2 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-300 hover:border-emerald-300 text-base"
