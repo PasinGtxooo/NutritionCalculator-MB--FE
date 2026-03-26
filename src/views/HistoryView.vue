@@ -270,10 +270,23 @@ const isExporting = ref(false)
 const parseDateTime = (dt) => {
   if (!dt) return null
   if (Array.isArray(dt)) {
-    return new Date(dt[0], dt[1] - 1, dt[2], dt[3] || 0, dt[4] || 0, dt[5] || 0)
+    // backend เก็บเวลาไทย (UTC+7) → ลบ 7 เพื่อได้ UTC จริง
+    return new Date(Date.UTC(dt[0], dt[1] - 1, dt[2], (dt[3] || 0) - 7, dt[4] || 0, dt[5] || 0))
   }
   return new Date(dt)
 }
+
+// แปลง Date → hour ในเวลาไทย UTC+7
+const getBangkokHour = (date) =>
+  parseInt(new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', hour: 'numeric', hour12: false }).format(date))
+
+// แปลง Date → "HH:MM" ในเวลาไทย
+const getBangkokTimeStr = (date) =>
+  new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false }).format(date)
+
+// แปลง Date → "YYYY-MM-DD" ในเวลาไทย
+const getBangkokDateKey = (date) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(date)
 
 const parseAi = (log) => {
   let name = log.text || 'ไม่ระบุ'
@@ -291,12 +304,12 @@ const parseAi = (log) => {
   }
 
   const dt = parseDateTime(log.datetimeFood) || new Date()
-  const hour = dt.getHours()
+  const hour = getBangkokHour(dt)
   let period = 'เย็น'
   if (hour < 11) period = 'เช้า'
   else if (hour < 15) period = 'กลางวัน'
 
-  const time = `${period} ${String(hour).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`
+  const time = `${period} ${getBangkokTimeStr(dt)}`
 
   return {
     name,
@@ -322,21 +335,21 @@ const filteredLogs = computed(() => {
 })
 
 const formatDateLabel = (date) => {
-  const target = new Date(date)
-  target.setHours(0, 0, 0, 0)
+  const d = new Date(date)
   const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
-  return `${target.getDate()} ${months[target.getMonth()]} ${target.getFullYear()}`
+  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', year: 'numeric', month: 'numeric', day: 'numeric' })
+  const parts = fmt.formatToParts(d)
+  const p = Object.fromEntries(parts.map(x => [x.type, x.value]))
+  return `${parseInt(p.day)} ${months[parseInt(p.month) - 1]} ${p.year}`
 }
 
 const groupedLogs = computed(() => {
   const groups = {}
   filteredLogs.value.forEach(item => {
-    const d = new Date(item.date)
-    d.setHours(0, 0, 0, 0)
-    const key = d.toISOString().split('T')[0]
+    const key = getBangkokDateKey(new Date(item.date))
 
     if (!groups[key]) {
-      groups[key] = { date: key, label: formatDateLabel(d), totalCalories: 0, items: [] }
+      groups[key] = { date: key, label: formatDateLabel(item.date), totalCalories: 0, items: [] }
     }
 
     groups[key].totalCalories += item.calories

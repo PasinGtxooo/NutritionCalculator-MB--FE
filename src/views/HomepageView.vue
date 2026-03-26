@@ -599,11 +599,11 @@
                 </h3>
 
                 <ul class="space-y-2 text-slate-700">
-                  <li><b>🍽️ ชื่ออาหาร:</b> {{ aiResult.name || '-' }}</li>
-                  <li><b>🔥 แคลอรี่:</b> {{ aiResult.calories || '-' }}</li>
-                  <li><b>💪 โปรตีน:</b> {{ aiResult.protein || '-' }}</li>
-                  <li><b>🥑 ไขมัน:</b> {{ aiResult.fat || '-' }}</li>
-                  <li><b>🍚 คาร์โบไฮเดรต:</b> {{ aiResult.carbohydrate || '-' }}</li>
+                  <li v-if="aiResult.name"><b>🍽️ ชื่ออาหาร:</b> {{ aiResult.name }}</li>
+                  <li v-if="aiResult.calories"><b>🔥 แคลอรี่:</b> {{ aiResult.calories }}</li>
+                  <li v-if="aiResult.protein"><b>💪 โปรตีน:</b> {{ aiResult.protein }}</li>
+                  <li v-if="aiResult.fat"><b>🥑 ไขมัน:</b> {{ aiResult.fat }}</li>
+                  <li v-if="aiResult.carbs"><b>🍚 คาร์โบไฮเดรต:</b> {{ aiResult.carbs }}</li>
                 </ul>
 
                 <div v-if="aiResult.advice" class="mt-3 p-3 bg-white rounded-xl text-sm text-slate-600">
@@ -700,12 +700,19 @@ const navigation = [
 const foodLogs = ref([]);
 const weeklyAnalysis = ref(null);
 
+// แปลง Date เป็นเวลาไทย UTC+7
+const getBangkokHour = (date) =>
+  parseInt(new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', hour: 'numeric', hour12: false }).format(date));
+
+const getBangkokTimeStr = (date) =>
+  new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false }).format(date);
+
 // แปลง datetimeFood ที่อาจเป็น array [2026,2,9,14,30] หรือ ISO string
 const parseDateTime = (dt) => {
   if (!dt) return null;
   if (Array.isArray(dt)) {
-    // [year, month, day, hour, minute, second?]
-    return new Date(dt[0], dt[1] - 1, dt[2], dt[3] || 0, dt[4] || 0, dt[5] || 0);
+    // backend เก็บเวลาไทย (UTC+7) → ลบ 7 เพื่อได้ UTC จริง
+    return new Date(Date.UTC(dt[0], dt[1] - 1, dt[2], (dt[3] || 0) - 7, dt[4] || 0, dt[5] || 0));
   }
   return new Date(dt);
 };
@@ -722,35 +729,42 @@ const recentMeals = computed(() => {
       } catch {}
     }
     const dt = parseDateTime(log.datetimeFood) || new Date();
-    const hour = dt.getHours();
+    const hour = getBangkokHour(dt);
     let period = 'เย็น';
     if (hour < 11) period = 'เช้า';
     else if (hour < 15) period = 'กลางวัน';
-    const timeStr = `${period} • ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    const timeStr = `${period} • ${getBangkokTimeStr(dt)}`;
     return { time: timeStr, name, calories: `${calories} kcal`, image: log.imagePath || null };
   });
 });
 
 const weekData = computed(() => {
   const dayNames = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-  const now = new Date();
-  const todayDow = now.getDay(); // 0=Sun
+  const nowUtc = new Date();
+  const bangkokParts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' })
+      .formatToParts(nowUtc).map(x => [x.type, x.value])
+  );
+  const todayDow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(bangkokParts.weekday);
 
-  // หาวันจันทร์ของสัปดาห์นี้
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((todayDow + 6) % 7));
-  monday.setHours(0, 0, 0, 0);
+  // หาวันจันทร์ของสัปดาห์นี้ (คำนวณจากวันที่ไทย)
+  const monday = new Date(Date.UTC(
+    parseInt(bangkokParts.year), parseInt(bangkokParts.month) - 1,
+    parseInt(bangkokParts.day) - ((todayDow + 6) % 7)
+  ));
 
   // สร้าง array 7 วัน (จ.-อา.)
   const weekOrder = [1, 2, 3, 4, 5, 6, 0]; // จ. อ. พ. พฤ. ศ. ส. อา.
   const dayCals = {};
   weekOrder.forEach(d => { dayCals[d] = 0; });
 
+  const weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   foodLogs.value.forEach(log => {
     const dt = parseDateTime(log.datetimeFood);
     if (!dt || isNaN(dt.getTime())) return;
     if (dt < monday) return;
-    const dow = dt.getDay();
+    const dowStr = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', weekday: 'short' }).format(dt);
+    const dow = weekdays.indexOf(dowStr);
     if (log.ai) {
       try {
         const ai = JSON.parse(log.ai);
@@ -1199,7 +1213,7 @@ const submitFood = async () => {
 
 // คำนวณสรุปวันนี้จาก food logs
 const greeting = computed(() => {
-  const h = new Date().getHours();
+  const h = getBangkokHour(new Date());
   if (h < 12) return 'อรุณสวัสดิ์ ☀️';
   if (h < 17) return 'สวัสดียามบ่าย 🌤️';
   return 'สวัสดียามเย็น 🌙';
@@ -1207,8 +1221,9 @@ const greeting = computed(() => {
 
 const todayDateStr = computed(() => {
   const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const d = new Date();
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
+  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', year: 'numeric', month: 'numeric', day: 'numeric' });
+  const parts = Object.fromEntries(fmt.formatToParts(new Date()).map(x => [x.type, x.value]));
+  return `${parseInt(parts.day)} ${months[parseInt(parts.month) - 1]} ${parseInt(parts.year) + 543}`;
 });
 
 const caloriePercent = computed(() => {
