@@ -397,7 +397,7 @@ const exportToPDF = async () => {
     container.innerHTML = `
       <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
       <h2 style="color:#16a34a;margin:0 0 6px">Green Health Buddy Report</h2>
-      <p style="color:#555;margin:0 0 4px">ผู้ใช้: ${user.value?.username || '-'}</p>
+      <p style="color:#555;margin:0 0 4px">ผู้ใช้: ${user.value?.firstname && user.value.lastname ? `${user.value.firstname} ${user.value.lastname}` : '-'}</p>
       <p style="color:#555;margin:0 0 20px">วันที่ส่งออก: ${dateStr}</p>
       <table style="width:100%;border-collapse:collapse;font-size:12px">
         <thead>
@@ -472,6 +472,18 @@ const exportToPDF = async () => {
 }
 
 onMounted(async () => {
+   try {
+    const res = await authApi.getUserByToken();
+    console.log('API response:', res.data);
+
+    if (!res.data || !res.data.data) {
+      throw new Error('User data missing');
+    }
+    user.value = res.data.data;
+  } catch (err) {
+    console.error('Failed to load user data:', err);
+  }
+
   try {
     const res = await foodApi.getFoods()
     foodLogs.value = res.data || []
